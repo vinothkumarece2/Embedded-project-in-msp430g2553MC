@@ -1,0 +1,34 @@
+#include <msp430g2553.h>
+#define PIR_PIN BIT0
+#define LDR_PIN BIT1
+void main(void)
+{
+    WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
+
+    P1DIR = 0b00001100;
+    P2DIR = 0b00000011;
+    P1OUT = 0b00000000;
+    P2OUT = 0b00000000;
+    P1DIR &= ~(PIR_PIN);
+    ADC10CTL1 = INCH_1;
+    ADC10CTL0 = SREF_0 + ADC10SHT_2 + ADC10ON;
+    ADC10AE0 |= LDR_PIN;
+while(1)
+{
+    ADC10CTL0 |= ENC + ADC10SC;
+    while (ADC10CTL1 & ADC10BUSY);
+    int ldr_value = ADC10MEM;
+
+    if(P1IN & PIR_PIN && ldr_value < 500)
+   {
+       P1OUT |= 0b00001100;
+       P2OUT |= 0b00000011;
+
+   }
+   else
+   {
+       P1OUT &= ~0b00001100;
+       P2OUT &= ~0b00000011;
+   }
+
+}}
