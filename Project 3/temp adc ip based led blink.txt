@@ -1,0 +1,38 @@
+#include <msp430.h>
+#define Temp_PIN BIT1 // P1.1
+int main(void)
+{
+    WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
+    P2DIR = 0b00000011;
+    P2OUT = 0b00000000;
+    ADC10CTL1 = INCH_1;
+    ADC10CTL0 = SREF_0 + ADC10SHT_2 + ADC10ON;
+    ADC10AE0 |= Temp_PIN;
+    while (1)
+    {
+        ADC10CTL0 |= ENC + ADC10SC;
+        while (ADC10CTL1 & ADC10BUSY);
+        int adc_value = ADC10MEM;
+        float voltage = adc_value * 5.0 / 1023.0;
+        float temp_celsius = voltage * 100.0;
+
+        if (temp_celsius >= 20 && temp_celsius < 40)
+        {
+            P2OUT |= 0b00000001;
+        }
+        else
+        {
+            P2OUT &= ~0b00000001;
+        }
+        if (temp_celsius >= 40 && temp_celsius <= 80)
+        {
+            P2OUT |= 0b00000010;
+        }
+        else
+        {
+            P2OUT &= ~0b00000010;
+        }
+
+    }
+    return 0;
+}
