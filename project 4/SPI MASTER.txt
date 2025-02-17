@@ -1,0 +1,33 @@
+#include <msp430.h>
+void main(void) {
+    WDTCTL = WDTPW | WDTHOLD; // Stop watchdog timer
+    P1SEL |= BIT5 + BIT6 + BIT7;
+    P1SEL2 |= BIT5 + BIT6 + BIT7;
+    P2DIR |= BIT0;
+    P2OUT |= BIT0;
+    UCB0CTL1 = UCSWRST;
+    UCB0CTL0 = UCCKPL + UCMSB + UCMST + UCSYNC;
+    UCB0CTL1 = UCSSEL_2;
+    UCB0BR0 = 0x02;
+    UCB0BR1 = 0;
+    UCB0CTL1 &= ~UCSWRST;
+
+    P1DIR |= BIT1;
+    P1OUT &= ~BIT1;
+    while (1)
+    {
+        P2OUT &= ~BIT0;
+        UCB0TXBUF = 'A'; // Transmit 'A'
+        while (UCB0STAT & UCBUSY);
+        while (!(IFG2 & UCB0RXIFG));
+        unsigned char receivedData = UCB0RXBUF;
+        P2OUT |= BIT0;
+        if (receivedData == 'X')
+        {
+            P1OUT |= BIT1;
+            __delay_cycles(1000000);
+            P1OUT &= ~BIT1;
+        }
+        __delay_cycles(1000000);
+    }
+}

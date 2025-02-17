@@ -1,0 +1,27 @@
+#include <msp430.h>
+void main(void) {
+    WDTCTL = WDTPW | WDTHOLD; // Stop watchdog timer
+    P1SEL |= BIT5 + BIT6 + BIT7; /
+    P1SEL2 |= BIT5 + BIT6 + BIT7;
+    P2DIR &= ~BIT0;
+    P2REN |= BIT0;
+    P2OUT |= BIT0;
+    UCB0CTL1 = UCSWRST;
+    UCB0CTL0 = UCCKPL + UCMSB + UCSYNC;
+    UCB0CTL1 &= ~UCSWRST;
+    P1DIR |= BIT0;
+    P1OUT &= ~BIT0;
+    while (1) {
+        while (!(IFG2 & UCB0RXIFG));
+        unsigned char receivedData = UCB0RXBUF;
+        if (receivedData == 'A')
+        {
+            P1OUT |= BIT0; // Turn on LED if 'A' received
+            __delay_cycles(1000000);
+            P1OUT &= ~BIT0; // Turn off LED
+            UCB0TXBUF = 'X'; // Respond with 'X'
+        }
+        while (UCB0STAT & UCBUSY); // Wait for TX complete
+        __delay_cycles(1000000);
+    }
+}
