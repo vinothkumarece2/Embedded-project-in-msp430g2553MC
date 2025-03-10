@@ -1,139 +1,157 @@
 #include <LiquidCrystal.h>
+
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
 #define Buzzer_PIN 7
-#define LED_PIN 1
+#define LED_PIN 8
+#define LED1_PIN 9
+#define LED2_PIN 10
 #define Piezo_PIN A0
 #define Switch_PIN1 A1
 #define Switch_PIN2 A2
 #define Switch_PIN3 A3
 #define Switch_PIN4 A4
 #define Switch_PIN5 A5
-#define Switch_PIN6 0
-void setup()
- {
-  lcd.begin(16, 2);
-  pinMode(LED_PIN, OUTPUT);
-  pinMode(Buzzer_PIN, OUTPUT);
-  pinMode(Piezo_PIN, INPUT);
-  pinMode(Switch_PIN1, INPUT);
-  pinMode(Switch_PIN2, INPUT);
-  pinMode(Switch_PIN3, INPUT);
-  pinMode(Switch_PIN4, INPUT);
-  pinMode(Switch_PIN5, INPUT);
-  pinMode(Switch_PIN6, INPUT);
+#define Switch_PIN6 13
+
+bool welcomeDisplayed = false;
+bool switchStates[6] = {false, false, false, false, false, false};
+
+void setup() {
+    lcd.begin(16, 2);
+    pinMode(LED_PIN, OUTPUT);
+    pinMode(Buzzer_PIN, OUTPUT);
+    pinMode(Piezo_PIN, INPUT);
+    
+    pinMode(Switch_PIN1, INPUT);
+    pinMode(Switch_PIN2, INPUT);
+    pinMode(Switch_PIN3, INPUT);
+    pinMode(Switch_PIN4, INPUT);
+    pinMode(Switch_PIN5, INPUT);
+    pinMode(Switch_PIN6, INPUT);
+    
+    Serial.begin(9600);
 }
-void loop() 
-{
-  int piezoValue = analogRead(Piezo_PIN);
-  if (piezoValue != 0)
-   {
-    lcd.setCursor(0, 0);
-    lcd.print("  Welcome");
-    lcd.setCursor(0, 1);
-    lcd.print(" My restaurant! ");
-    delay(5000);
-    lcd.clear();
-    digitalWrite(LED_PIN, HIGH);
-    digitalWrite(Buzzer_PIN, HIGH);
-    lcd.setCursor(0, 0);
-    lcd.print("CHECK THE");
-    lcd.setCursor(0, 1);
-    lcd.print("HOTEL MENU");
-    delay(3000);
-    digitalWrite(LED_PIN, LOW);
-    delay(1000);
-    digitalWrite(LED_PIN, HIGH);
-    delay(800);
-    digitalWrite(LED_PIN, LOW);
-    digitalWrite(Buzzer_PIN, LOW);
-  }
-  if (digitalRead(Switch_PIN1) == HIGH)
-   {
-    lcd.setCursor(0, 0);
-    lcd.print("MONDAY OFFER");
-    digitalWrite(Buzzer_PIN, HIGH);
-    delay(2000);
-    lcd.setCursor(0, 1);
-    lcd.print("BUY ONE GET ONE");
-    delay(5000);
-  } 
-  else
-   {
-    digitalWrite(Buzzer_PIN, LOW);
-    lcd.clear();
-  }
-  if (digitalRead(Switch_PIN2) == HIGH) 
-  {
-    lcd.setCursor(0, 0);
-    lcd.print("TUESDAY OFFER");
-    digitalWrite(Buzzer_PIN, HIGH);
-    delay(2000);
-    lcd.setCursor(0, 1);
-    lcd.print("20% OFF BURGERS");
-    delay(5000);
-  } 
-  else 
-  {
-    digitalWrite(Buzzer_PIN, LOW);
-    lcd.clear();
-  }
-  if (digitalRead(Switch_PIN3) == HIGH) 
-  {
-    lcd.setCursor(0, 0);
-    lcd.print("WEDNESDAY OFFER");
-    digitalWrite(Buzzer_PIN, HIGH);
-    delay(2000);
-    lcd.setCursor(0, 1);
-    lcd.print("FREE DESSERT");
-    delay(5000);
-  }
-   else
+
+void loop() {
+    int piezoValue = analogRead(Piezo_PIN);
+    float voltage = (piezoValue / 1023.0) * 5.0;
+    Serial.print("Piezo Voltage: ");
+    Serial.println(voltage);
+    
+    if (piezoValue != 0 && !welcomeDisplayed) { 
+        lcd.setCursor(0, 0);
+        lcd.print("  Welcome");
+        lcd.setCursor(0, 1);
+        lcd.print(" My Restaurant! ");
+        delay(2000);
+         lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print(" please Press");
+          lcd.setCursor(0,1);
+          lcd.print("the Switch");
+        digitalWrite(LED_PIN, HIGH);
+        digitalWrite(LED1_PIN, HIGH);
+        digitalWrite(LED2_PIN, HIGH);
+        digitalWrite(Buzzer_PIN, HIGH);
+        delay(5000);
+        lcd.clear();
+        digitalWrite(LED_PIN, LOW);
+         digitalWrite(LED1_PIN, LOW);
+          digitalWrite(LED2_PIN, LOW);
+        digitalWrite(Buzzer_PIN, LOW);
+        welcomeDisplayed = true;
+    }
+    if (digitalRead(Switch_PIN1) == HIGH && !switchStates[0]) 
     {
-    digitalWrite(Buzzer_PIN, LOW);
-    lcd.clear();
-  }
-  if (digitalRead(Switch_PIN4) == HIGH) 
-  {
-    lcd.setCursor(0, 0);
-    lcd.print("THURSDAY OFFER");
-    digitalWrite(Buzzer_PIN, HIGH);
-    delay(2000);
-    lcd.setCursor(0, 1);
-    lcd.print("BOGO BEVERAGES");
-    delay(5000);
-  } else
-   {
-    digitalWrite(Buzzer_PIN, LOW);
-    lcd.clear();
-  }
-  if (digitalRead(Switch_PIN5) == HIGH) 
-  {
-    lcd.setCursor(0, 0);
-    lcd.print("FRIDAY OFFER");
-    digitalWrite(Buzzer_PIN, HIGH);
-    delay(2000);
-    lcd.setCursor(0, 1);
-    lcd.print("30% OFF Delivery");
-    delay(5000);
-  } else 
-  {
-    digitalWrite(Buzzer_PIN, LOW);
-    lcd.clear();
-  }
-  if (digitalRead(Switch_PIN6) == HIGH)
-   {
-    lcd.setCursor(0, 0);
-    lcd.print("SAT AND SUN COMBO");
-    digitalWrite(Buzzer_PIN, HIGH);
-    delay(2000);
-    lcd.setCursor(0, 1);
-    lcd.print("FAMILY MEALS 25% OFF");
-    delay(5000);
-  } 
-  else 
-  {
-    digitalWrite(Buzzer_PIN, LOW);
-    lcd.clear();
-  }
+        lcd.setCursor(0, 0);
+        lcd.print("MONDAY OFFER");
+        lcd.setCursor(0, 1);
+        
+        lcd.print("BUY ONE GET ONE");
+        digitalWrite(Buzzer_PIN, HIGH);
+        delay(5000);
+        digitalWrite(Buzzer_PIN, LOW);
+        lcd.clear();
+        switchStates[0] = true;
+    }
+
+    if (digitalRead(Switch_PIN2) == HIGH && !switchStates[1])
+     {
+        lcd.setCursor(0, 0);
+        lcd.print("TUESDAY OFFER");
+        lcd.setCursor(0, 1);
+        lcd.print("20% OFF BURGERS");
+        digitalWrite(Buzzer_PIN, HIGH);
+        delay(5000);
+        digitalWrite(Buzzer_PIN, LOW);
+        lcd.clear();
+        switchStates[1] = true;
+    }
+
+    if (digitalRead(Switch_PIN3) == HIGH && !switchStates[2]) {
+        lcd.setCursor(0, 0);
+        lcd.print("WEDNESDAY OFFER");
+        lcd.setCursor(0, 1);
+        lcd.print("FREE DESSERT");
+        digitalWrite(Buzzer_PIN, HIGH);
+        delay(5000);
+        digitalWrite(Buzzer_PIN, LOW);
+        lcd.clear();
+        switchStates[2] = true;
+    }
+
+    if (digitalRead(Switch_PIN4) == HIGH && !switchStates[3])
+     {
+        lcd.setCursor(0, 0);
+        lcd.print("THURSDAY OFFER");
+        lcd.setCursor(0, 1);
+        lcd.print("BOGO BEVERAGES");
+        digitalWrite(Buzzer_PIN, HIGH);
+        delay(5000);
+        digitalWrite(Buzzer_PIN, LOW);
+        lcd.clear();
+        switchStates[3] = true;
+    }
+
+    if (digitalRead(Switch_PIN5) == HIGH && !switchStates[4]) 
+    {
+        lcd.setCursor(0, 0);
+        lcd.print("FRIDAY OFFER");
+        lcd.setCursor(0, 1);
+        lcd.print("30% OFF Delivery");
+        digitalWrite(Buzzer_PIN, HIGH);
+        delay(5000);
+        digitalWrite(Buzzer_PIN, LOW);
+        lcd.clear();
+        switchStates[4] = true;
+    }
+
+    if (digitalRead(Switch_PIN6) == HIGH && !switchStates[5])
+     {
+        lcd.setCursor(0, 0);
+        lcd.print("SAT & SUN COMBO");
+        lcd.setCursor(0, 1);
+        lcd.print("FAMILY MEALS 25% OFF");
+        digitalWrite(Buzzer_PIN, HIGH);
+        delay(5000);
+        digitalWrite(Buzzer_PIN, LOW);
+        lcd.clear();
+        switchStates[5] = true;
+    }
+    bool allPressed = true;
+    for (int i = 0; i < 6; i++) {
+        if (!switchStates[i]) {
+            allPressed = false;
+            break;
+        }
+    }
+
+    if (allPressed) {
+        welcomeDisplayed = false;
+        for (int i = 0; i < 6; i++) {
+            switchStates[i] = false;
+        }
+    }
 }
